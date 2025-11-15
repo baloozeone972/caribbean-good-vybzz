@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Membres - caribean Good Vybzz</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header Admin -->
+    <header class="admin-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <img th:src="@{/images/logo.jpg}" alt="Logo caribean Good Vybzz" class="logo">
+                <h1 class="site-title">caribean Good Vybzz - Admin</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                    <li><a th:href="@{/admin/members}">Membres</a></li>
+                    <li><a th:href="@{/admin/contacts}">Messages</a></li>
+                    <li><a th:href="@{/admin/media}">Médias</a></li>
+                    <li><a th:href="@{/}">Voir le site</a></li>
+                    <li>
+                        <form th:action="@{/admin/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-danger" 
+                                    style="padding: 8px 15px; font-size: 0.9rem;">
+                                Déconnexion
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <h1>Gestion des Membres</h1>
+        
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <span th:text="${successMessage}">Message de succès</span>
+        </div>
+        
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span th:text="${errorMessage}">Message d'erreur</span>
+        </div>
+        
+        <div class="card">
+            <h2>Liste des Membres (<span th:text="${members.size()}">0</span>)</h2>
+            
+            <div th:if="${members.isEmpty()}" class="alert alert-info">
+                <p>Aucun membre inscrit pour le moment.</p>
+            </div>
+            
+            <div th:unless="${members.isEmpty()}" style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom Complet</th>
+                            <th>Email</th>
+                            <th>Téléphone</th>
+                            <th>Date d'Inscription</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="member : ${members}">
+                            <td th:text="${member.id}">1</td>
+                            <td th:text="${member.fullName}">John Doe</td>
+                            <td th:text="${member.email}">john@example.com</td>
+                            <td th:text="${member.phone}">+33 6 12 34 56 78</td>
+                            <td th:text="${#temporals.format(member.registrationDate, 'dd/MM/yyyy HH:mm')}">
+                                15/01/2025 10:30
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${member.status.name() == 'ACTIF'} ? 'badge-success' : 
+                                                      (${member.status.name() == 'EN_ATTENTE'} ? 'badge-warning' : 'badge-danger')"
+                                      th:text="${member.status}">
+                                    ACTIF
+                                </span>
+                            </td>
+                            <td>
+                                <!-- Boutons de changement de statut -->
+                                <form th:action="@{/admin/members/{id}/status(id=${member.id})}" 
+                                      method="post" 
+                                      style="display: inline;">
+                                    <select name="status" onchange="this.form.submit()" 
+                                            style="padding: 5px; border-radius: 3px;">
+                                        <option value="ACTIF" th:selected="${member.status.name() == 'ACTIF'}">
+                                            Actif
+                                        </option>
+                                        <option value="EN_ATTENTE" th:selected="${member.status.name() == 'EN_ATTENTE'}">
+                                            En Attente
+                                        </option>
+                                        <option value="INACTIF" th:selected="${member.status.name() == 'INACTIF'}">
+                                            Inactif
+                                        </option>
+                                    </select>
+                                </form>
+                                
+                                <!-- Bouton de suppression -->
+                                <form th:action="@{/admin/members/{id}/delete(id=${member.id})}" 
+                                      method="post" 
+                                      style="display: inline;">
+                                    <button type="submit" 
+                                            class="btn btn-danger" 
+                                            style="padding: 5px 10px; font-size: 0.85rem;"
+                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce membre ?')">
+                                        🗑️ Supprimer
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 caribean Good Vybzz. Tous droits réservés.</p>
+    </footer>
+
+    <script th:src="@{/js/script.js}"></script>
+</body>
+</html>

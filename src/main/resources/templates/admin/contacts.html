@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages de Contact - caribean Good Vybzz</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header Admin -->
+    <header class="admin-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <img th:src="@{/images/logo.jpg}" alt="Logo caribean Good Vybzz" class="logo">
+                <h1 class="site-title">caribean Good Vybzz - Admin</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                    <li><a th:href="@{/admin/members}">Membres</a></li>
+                    <li><a th:href="@{/admin/contacts}">Messages</a></li>
+                    <li><a th:href="@{/admin/media}">Médias</a></li>
+                    <li><a th:href="@{/}">Voir le site</a></li>
+                    <li>
+                        <form th:action="@{/admin/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-danger" 
+                                    style="padding: 8px 15px; font-size: 0.9rem;">
+                                Déconnexion
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <h1>Messages de Contact</h1>
+        
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <span th:text="${successMessage}">Message de succès</span>
+        </div>
+        
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span th:text="${errorMessage}">Message d'erreur</span>
+        </div>
+        
+        <div class="card">
+            <h2>
+                Messages reçus (<span th:text="${contacts.size()}">0</span>)
+                <span th:if="${unreadCount > 0}" class="badge badge-warning" style="margin-left: 10px;">
+                    <span th:text="${unreadCount}">0</span> non lus
+                </span>
+            </h2>
+            
+            <div th:if="${contacts.isEmpty()}" class="alert alert-info">
+                <p>Aucun message reçu pour le moment.</p>
+            </div>
+            
+            <div th:unless="${contacts.isEmpty()}" style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Sujet</th>
+                            <th>Message</th>
+                            <th>Date</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="contact : ${contacts}"
+                            th:style="${!contact.isRead} ? 'background-color: #FFF8DC; font-weight: bold;' : ''">
+                            <td th:text="${contact.id}">1</td>
+                            <td th:text="${contact.name}">Jane Doe</td>
+                            <td th:text="${contact.email}">jane@example.com</td>
+                            <td th:text="${contact.subject}">Demande d'informations</td>
+                            <td>
+                                <div th:text="${#strings.abbreviate(contact.message, 50)}" 
+                                     style="max-width: 200px;">
+                                    Message abrégé...
+                                </div>
+                                <button type="button" 
+                                        onclick="alert(this.getAttribute('data-message'))"
+                                        th:attr="data-message=${contact.message}"
+                                        class="btn btn-secondary" 
+                                        style="padding: 3px 8px; font-size: 0.8rem; margin-top: 5px;">
+                                    Lire complet
+                                </button>
+                            </td>
+                            <td th:text="${#temporals.format(contact.receivedDate, 'dd/MM/yyyy HH:mm')}">
+                                15/01/2025 14:30
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${contact.isRead} ? 'badge-success' : 'badge-warning'"
+                                      th:text="${contact.isRead} ? 'Lu' : 'Non lu'">
+                                    Non lu
+                                </span>
+                            </td>
+                            <td>
+                                <!-- Bouton marquer comme lu -->
+                                <form th:if="${!contact.isRead}"
+                                      th:action="@{/admin/contacts/{id}/read(id=${contact.id})}" 
+                                      method="post" 
+                                      style="display: inline;">
+                                    <button type="submit" 
+                                            class="btn btn-success" 
+                                            style="padding: 5px 10px; font-size: 0.85rem;">
+                                        ✓ Marquer lu
+                                    </button>
+                                </form>
+                                
+                                <!-- Bouton de suppression -->
+                                <form th:action="@{/admin/contacts/{id}/delete(id=${contact.id})}" 
+                                      method="post" 
+                                      style="display: inline;">
+                                    <button type="submit" 
+                                            class="btn btn-danger" 
+                                            style="padding: 5px 10px; font-size: 0.85rem;"
+                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce message ?')">
+                                        🗑️ Supprimer
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 caribean Good Vybzz. Tous droits réservés.</p>
+    </footer>
+
+    <script th:src="@{/js/script.js}"></script>
+</body>
+</html>

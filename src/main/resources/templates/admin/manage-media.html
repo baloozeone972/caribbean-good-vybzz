@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Médias - caribean Good Vybzz</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header Admin -->
+    <header class="admin-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <img th:src="@{/images/logo.jpg}" alt="Logo caribean Good Vybzz" class="logo">
+                <h1 class="site-title">caribean Good Vybzz - Admin</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                    <li><a th:href="@{/admin/members}">Membres</a></li>
+                    <li><a th:href="@{/admin/contacts}">Messages</a></li>
+                    <li><a th:href="@{/admin/media}">Médias</a></li>
+                    <li><a th:href="@{/}">Voir le site</a></li>
+                    <li>
+                        <form th:action="@{/admin/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-danger" 
+                                    style="padding: 8px 15px; font-size: 0.9rem;">
+                                Déconnexion
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <h1>Gestion des Médias</h1>
+        
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <span th:text="${successMessage}">Message de succès</span>
+        </div>
+        
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span th:text="${errorMessage}">Message d'erreur</span>
+        </div>
+        
+        <!-- Formulaire d'Upload de Photo -->
+        <section class="card">
+            <h2>📸 Ajouter une Photo</h2>
+            <form th:action="@{/admin/media/upload}" 
+                  method="post" 
+                  enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="photoFile">Fichier Image *</label>
+                    <input type="file" 
+                           id="photoFile" 
+                           name="file" 
+                           accept="image/*"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="photoTitle">Titre *</label>
+                    <input type="text" 
+                           id="photoTitle" 
+                           name="title" 
+                           placeholder="Titre de la photo"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="photoDescription">Description</label>
+                    <textarea id="photoDescription" 
+                              name="description" 
+                              placeholder="Description de la photo"
+                              rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    Upload Photo
+                </button>
+            </form>
+        </section>
+        
+        <!-- Formulaire d'Ajout de Vidéo -->
+        <section class="card" style="margin-top: 2rem;">
+            <h2>🎥 Ajouter une Vidéo</h2>
+            <p style="color: var(--text-light); margin-bottom: 1rem;">
+                Ajoutez une vidéo en fournissant l'URL YouTube, Vimeo ou autre plateforme.
+            </p>
+            <form th:action="@{/admin/media/video}" 
+                  th:object="${newMedia}"
+                  method="post">
+                <div class="form-group">
+                    <label for="videoUrl">URL de la Vidéo *</label>
+                    <input type="url" 
+                           id="videoUrl" 
+                           th:field="*{filePath}" 
+                           placeholder="https://www.youtube.com/watch?v=..."
+                           required>
+                    <small style="color: var(--text-light);">
+                        Exemples: YouTube, Vimeo, Dailymotion, etc.
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="videoTitle">Titre *</label>
+                    <input type="text" 
+                           id="videoTitle" 
+                           th:field="*{title}" 
+                           placeholder="Titre de la vidéo"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="videoDescription">Description</label>
+                    <textarea id="videoDescription" 
+                              th:field="*{description}" 
+                              placeholder="Description de la vidéo"
+                              rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    Ajouter Vidéo
+                </button>
+            </form>
+        </section>
+        
+        <!-- Liste des Médias -->
+        <section class="card" style="margin-top: 2rem;">
+            <h2>Liste des Médias (<span th:text="${mediaList.size()}">0</span>)</h2>
+            
+            <div th:if="${mediaList.isEmpty()}" class="alert alert-info">
+                <p>Aucun média ajouté pour le moment.</p>
+            </div>
+            
+            <div th:unless="${mediaList.isEmpty()}" style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Type</th>
+                            <th>Titre</th>
+                            <th>Description</th>
+                            <th>Aperçu</th>
+                            <th>Date d'Upload</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="media : ${mediaList}">
+                            <td th:text="${media.id}">1</td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${media.type.name() == 'PHOTO'} ? 'badge-info' : 'badge-warning'"
+                                      th:text="${media.type}">
+                                    PHOTO
+                                </span>
+                            </td>
+                            <td th:text="${media.title}">Titre</td>
+                            <td>
+                                <div th:text="${#strings.abbreviate(media.description, 40)}" 
+                                     style="max-width: 150px;">
+                                    Description...
+                                </div>
+                            </td>
+                            <td>
+                                <!-- Aperçu Photo -->
+                                <img th:if="${media.type.name() == 'PHOTO'}"
+                                     th:src="@{${media.filePath}}" 
+                                     alt="Aperçu"
+                                     style="width: 80px; height: 60px; object-fit: cover; border-radius: 5px;">
+                                
+                                <!-- Icône Vidéo -->
+                                <span th:if="${media.type.name() == 'VIDEO'}" 
+                                      style="font-size: 2rem;">
+                                    🎬
+                                </span>
+                            </td>
+                            <td th:text="${#temporals.format(media.uploadDate, 'dd/MM/yyyy')}">
+                                15/01/2025
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${media.isPublished} ? 'badge-success' : 'badge-danger'"
+                                      th:text="${media.isPublished} ? 'Publié' : 'Non publié'">
+                                    Publié
+                                </span>
+                            </td>
+                            <td>
+                                <!-- Toggle Publish -->
+                                <form th:action="@{/admin/media/{id}/publish(id=${media.id})}" 
+                                      method="post" 
+                                      style="display: inline;">
+                                    <input type="hidden" 
+                                           name="isPublished" 
+                                           th:value="${!media.isPublished}">
+                                    <button type="submit" 
+                                            class="btn"
+                                            th:classappend="${media.isPublished} ? 'btn-danger' : 'btn-success'"
+                                            style="padding: 5px 10px; font-size: 0.85rem;">
+                                        <span th:text="${media.isPublished} ? '👁️ Dépublier' : '✓ Publier'">
+                                            Publier
+                                        </span>
+                                    </button>
+                                </form>
+                                
+                                <!-- Suppression -->
+                                <form th:action="@{/admin/media/{id}/delete(id=${media.id})}" 
+                                      method="post" 
+                                      style="display: inline;">
+                                    <button type="submit" 
+                                            class="btn btn-danger" 
+                                            style="padding: 5px 10px; font-size: 0.85rem;"
+                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce média ?')">
+                                        🗑️
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 caribean Good Vybzz. Tous droits réservés.</p>
+    </footer>
+
+    <script th:src="@{/js/script.js}"></script>
+</body>
+</html>

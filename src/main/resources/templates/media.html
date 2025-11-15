@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Galerie - caribean Good Vybzz</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo-section">
+                <img th:src="@{/images/logo.jpg}" alt="Logo caribean Good Vybzz" class="logo">
+                <h1 class="site-title">caribean Good Vybzz</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a th:href="@{/}">Accueil</a></li>
+                    <li><a th:href="@{/inscription}">Inscription</a></li>
+                    <li><a th:href="@{/contact}">Contact</a></li>
+                    <li><a th:href="@{/media}">Galerie</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <h1>Galerie Photos & Vidéos</h1>
+        
+        <!-- Section Photos -->
+        <section class="card">
+            <h2>📸 Nos Photos</h2>
+            <p style="color: var(--text-light); margin-bottom: 2rem;">
+                Découvrez les moments forts de nos événements et activités culturelles.
+            </p>
+            
+            <div th:if="${photos.isEmpty()}" class="alert alert-info">
+                <p>Aucune photo disponible pour le moment. Revenez bientôt !</p>
+            </div>
+            
+            <div th:unless="${photos.isEmpty()}" class="gallery">
+                <div class="gallery-item" th:each="photo : ${photos}">
+                    <img th:src="@{${photo.filePath}}" 
+                         th:alt="${photo.title}"
+                         loading="lazy">
+                    <div class="gallery-item-info">
+                        <h3 th:text="${photo.title}">Titre de la photo</h3>
+                        <p th:text="${photo.description}" th:if="${photo.description}">
+                            Description de la photo
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section Vidéos -->
+        <section class="card" style="margin-top: 3rem;">
+            <h2>🎥 Nos Vidéos</h2>
+            <p style="color: var(--text-light); margin-bottom: 2rem;">
+                Revivez nos événements en vidéo !
+            </p>
+            
+            <div th:if="${videos.isEmpty()}" class="alert alert-info">
+                <p>Aucune vidéo disponible pour le moment. Revenez bientôt !</p>
+            </div>
+            
+            <div th:unless="${videos.isEmpty()}" class="gallery">
+                <div class="gallery-item" th:each="video : ${videos}">
+                    <div class="video-container">
+                        <!-- Support pour YouTube -->
+                        <iframe th:if="${#strings.contains(video.filePath, 'youtube') or #strings.contains(video.filePath, 'youtu.be')}"
+                                th:src="${#strings.replace(#strings.replace(video.filePath, 'watch?v=', 'embed/'), 'youtu.be/', 'youtube.com/embed/')}"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                        </iframe>
+                        
+                        <!-- Support pour Vimeo -->
+                        <iframe th:if="${#strings.contains(video.filePath, 'vimeo')}"
+                                th:src="${#strings.replace(video.filePath, 'vimeo.com/', 'player.vimeo.com/video/')}"
+                                frameborder="0"
+                                allow="autoplay; fullscreen; picture-in-picture"
+                                allowfullscreen>
+                        </iframe>
+                        
+                        <!-- Autres vidéos (iframe générique) -->
+                        <iframe th:unless="${#strings.contains(video.filePath, 'youtube') or #strings.contains(video.filePath, 'youtu.be') or #strings.contains(video.filePath, 'vimeo')}"
+                                th:src="${video.filePath}"
+                                frameborder="0"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                    <div class="gallery-item-info">
+                        <h3 th:text="${video.title}">Titre de la vidéo</h3>
+                        <p th:text="${video.description}" th:if="${video.description}">
+                            Description de la vidéo
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 caribean Good Vybzz. Tous droits réservés.</p>
+    </footer>
+
+    <script th:src="@{/js/script.js}"></script>
+</body>
+</html>

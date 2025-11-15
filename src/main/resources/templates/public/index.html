@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('Accueil', ~{::main})}">
+<body>
+    <main>
+        <!-- Section Hero -->
+        <section class="hero-section">
+            <div class="container">
+                <h1 class="display-3 fw-bold mb-4">
+                    <i class="fas fa-drum"></i> caribean Good Vybzz
+                </h1>
+                <p class="lead fs-4 mb-4">
+                    Vibrez au rythme de la culture caribéenne !
+                </p>
+                <a href="/inscription" class="btn btn-caribean btn-lg">
+                    <i class="fas fa-user-plus"></i> Rejoignez-nous
+                </a>
+            </div>
+        </section>
+        
+        <!-- Section Présentation -->
+        <section class="py-5">
+            <div class="container">
+                <div class="row align-items-center mb-5">
+                    <div class="col-md-6">
+                        <h2 class="mb-4"><i class="fas fa-heart"></i> Qui sommes-nous ?</h2>
+                        <p class="lead">
+                            caribean Good Vybzz est une association dédiée à la promotion et la célébration
+                            de la richesse culturelle des îles caribéennes.
+                        </p>
+                        <p>
+                            À travers la musique, la danse, la gastronomie et les arts, nous créons des moments 
+                            de partage et de joie qui rassemblent nos communautés.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <img th:src="@{/images/logo.jpeg}" alt="caribean Good Vybzz" class="img-fluid rounded shadow">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section Actualités -->
+        <section class="py-5 bg-light" th:if="${#lists.size(articles) > 0}">
+            <div class="container">
+                <h2 class="text-center mb-5">
+                    <i class="fas fa-newspaper"></i> Nos actualités
+                </h2>
+                <div class="row">
+                    <div class="col-md-4 mb-4" th:each="article : ${articles}">
+                        <div class="card h-100">
+                            <img th:if="${article.imageUrl}" 
+                                 th:src="${article.imageUrl}" 
+                                 class="card-img-top" 
+                                 alt="Image article"
+                                 style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${article.titre}">Titre de l'article</h5>
+                                <p class="card-text" th:text="${#strings.abbreviate(article.contenu, 150)}">
+                                    Contenu de l'article...
+                                </p>
+                                <p class="text-muted small">
+                                    <i class="fas fa-calendar"></i>
+                                    <span th:text="${#temporals.format(article.dateCreation, 'dd/MM/yyyy')}"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section Nos activités -->
+        <section class="py-5">
+            <div class="container">
+                <h2 class="text-center mb-5">
+                    <i class="fas fa-star"></i> Nos activités
+                </h2>
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <i class="fas fa-music fa-3x text-warning mb-3"></i>
+                                <h5 class="card-title">Musique & Danse</h5>
+                                <p class="card-text">
+                                    Cours de danse caribéenne, ateliers de percussion et soirées musicales
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <i class="fas fa-utensils fa-3x text-danger mb-3"></i>
+                                <h5 class="card-title">Gastronomie</h5>
+                                <p class="card-text">
+                                    Ateliers culinaires et découverte des saveurs caribéennes
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <i class="fas fa-calendar-alt fa-3x text-success mb-3"></i>
+                                <h5 class="card-title">Événements</h5>
+                                <p class="card-text">
+                                    Festivals, concerts et célébrations des traditions caribéennes
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Call to Action -->
+        <section class="py-5 text-center" style="background: linear-gradient(135deg, var(--caribean-primary), var(--caribean-secondary));">
+            <div class="container">
+                <h2 class="text-white mb-4">
+                    <i class="fas fa-hands-helping"></i> Prêt à nous rejoindre ?
+                </h2>
+                <p class="lead text-white mb-4">
+                    Devenez membre de notre association et vivez la culture caribéenne au quotidien !
+                </p>
+                <a href="/inscription" class="btn btn-light btn-lg me-3">
+                    <i class="fas fa-user-plus"></i> S'inscrire
+                </a>
+                <a href="/contact" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-envelope"></i> Nous contacter
+                </a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

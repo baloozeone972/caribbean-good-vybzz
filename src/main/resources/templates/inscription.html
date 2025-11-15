@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Inscription - caribean Good Vybzz</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo-section">
+                <img th:src="@{/images/logo.jpg}" alt="Logo caribean Good Vybzz" class="logo">
+                <h1 class="site-title">caribean Good Vybzz</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a th:href="@{/}">Accueil</a></li>
+                    <li><a th:href="@{/inscription}">Inscription</a></li>
+                    <li><a th:href="@{/contact}">Contact</a></li>
+                    <li><a th:href="@{/media}">Galerie</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="card">
+            <h1>Devenir Membre</h1>
+            
+            <!-- Message de succès -->
+            <div th:if="${param.success}" class="alert alert-success">
+                <strong>Succès !</strong> Merci pour votre inscription ! 
+                Nous vous contacterons bientôt pour confirmer votre adhésion.
+            </div>
+            
+            <!-- Message d'erreur -->
+            <div th:if="${errorMessage}" class="alert alert-error">
+                <strong>Erreur !</strong> <span th:text="${errorMessage}">Message d'erreur</span>
+            </div>
+            
+            <p style="font-size: 1.05rem; color: var(--text-light); margin-bottom: 2rem;">
+                Rejoignez notre communauté et participez à nos événements culturels ! 
+                Remplissez le formulaire ci-dessous pour devenir membre de caribean Good Vybzz.
+            </p>
+            
+            <form th:action="@{/inscription}" th:object="${member}" method="post" data-validate>
+                
+                <div class="form-group">
+                    <label for="fullName">Nom complet *</label>
+                    <input type="text" 
+                           id="fullName" 
+                           th:field="*{fullName}" 
+                           class="form-control"
+                           placeholder="Entrez votre nom complet"
+                           required>
+                    <span th:if="${#fields.hasErrors('fullName')}" 
+                          th:errors="*{fullName}" 
+                          style="color: var(--error); font-size: 0.9rem;"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" 
+                           id="email" 
+                           th:field="*{email}" 
+                           class="form-control"
+                           placeholder="votre.email@exemple.com"
+                           required>
+                    <span th:if="${#fields.hasErrors('email')}" 
+                          th:errors="*{email}" 
+                          style="color: var(--error); font-size: 0.9rem;"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Téléphone *</label>
+                    <input type="tel" 
+                           id="phone" 
+                           th:field="*{phone}" 
+                           class="form-control"
+                           placeholder="+33 6 12 34 56 78"
+                           required>
+                    <span th:if="${#fields.hasErrors('phone')}" 
+                          th:errors="*{phone}" 
+                          style="color: var(--error); font-size: 0.9rem;"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Message de motivation (optionnel)</label>
+                    <textarea id="message" 
+                              th:field="*{message}" 
+                              class="form-control"
+                              placeholder="Pourquoi souhaitez-vous rejoindre notre association ?"></textarea>
+                    <span th:if="${#fields.hasErrors('message')}" 
+                          th:errors="*{message}" 
+                          style="color: var(--error); font-size: 0.9rem;"></span>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">
+                        S'inscrire
+                    </button>
+                    <a th:href="@{/}" class="btn btn-secondary" style="margin-left: 10px;">
+                        Retour à l'accueil
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 caribean Good Vybzz. Tous droits réservés.</p>
+    </footer>
+
+    <script th:src="@{/js/script.js}"></script>
+</body>
+</html>

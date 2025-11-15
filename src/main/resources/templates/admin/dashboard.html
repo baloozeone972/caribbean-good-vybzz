@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: adminLayout('Tableau de bord', ~{::main})}">
+<body>
+    <main>
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+                <i class="fas fa-tachometer-alt"></i> Tableau de bord
+            </h1>
+        </div>
+        
+        <!-- Cartes de statistiques -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Articles publiés</h6>
+                                <h2 class="mb-0" th:text="${nbArticles}">0</h2>
+                            </div>
+                            <div class="text-primary">
+                                <i class="fas fa-newspaper fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <a href="/admin/articles" class="text-decoration-none small">
+                            Gérer les articles <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Médias visibles</h6>
+                                <h2 class="mb-0" th:text="${nbMedias}">0</h2>
+                            </div>
+                            <div class="text-success">
+                                <i class="fas fa-images fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <a href="/admin/medias" class="text-decoration-none small">
+                            Gérer les médias <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card warning">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Inscriptions en attente</h6>
+                                <h2 class="mb-0" th:text="${nbInscriptionsEnAttente}">0</h2>
+                            </div>
+                            <div class="text-warning">
+                                <i class="fas fa-user-clock fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <a href="/admin/inscriptions" class="text-decoration-none small">
+                            Gérer les inscriptions <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card danger">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Messages non lus</h6>
+                                <h2 class="mb-0" th:text="${nbMessagesNonLus}">0</h2>
+                            </div>
+                            <div class="text-danger">
+                                <i class="fas fa-envelope fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <a href="/admin/contacts" class="text-decoration-none small">
+                            Voir les messages <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions rapides -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt"></i> Actions rapides
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/admin/articles/nouveau" class="btn btn-outline-primary">
+                                <i class="fas fa-plus"></i> Créer un nouvel article
+                            </a>
+                            <a href="/admin/medias/nouveau" class="btn btn-outline-success">
+                                <i class="fas fa-upload"></i> Ajouter un média
+                            </a>
+                            <a href="/" target="_blank" class="btn btn-outline-info">
+                                <i class="fas fa-eye"></i> Prévisualiser le site
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle"></i> Informations
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="fas fa-check-circle text-success"></i> Système opérationnel</p>
+                        <p><i class="fas fa-database text-primary"></i> Base de données connectée</p>
+                        <p class="mb-0">
+                            <i class="fas fa-globe text-info"></i> 
+                            Site accessible à l'adresse: 
+                            <a href="/" target="_blank">http://localhost:8080</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Guide d'utilisation -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-question-circle"></i> Guide d'utilisation rapide
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-newspaper text-primary"></i> Articles</h6>
+                                <p class="small">
+                                    Créez et gérez les articles d'information affichés sur la page d'accueil. 
+                                    Vous pouvez les publier ou les garder en brouillon.
+                                </p>
+                                
+                                <h6><i class="fas fa-images text-success"></i> Médias</h6>
+                                <p class="small">
+                                    Ajoutez des photos et vidéos dans la galerie. Indiquez l'URL du fichier 
+                                    hébergé (YouTube, Google Drive, etc.) et une miniature pour les vidéos.
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-user-plus text-warning"></i> Inscriptions</h6>
+                                <p class="small">
+                                    Consultez les demandes d'inscription et changez leur statut 
+                                    (en attente, validée, refusée).
+                                </p>
+                                
+                                <h6><i class="fas fa-envelope text-danger"></i> Contacts</h6>
+                                <p class="small">
+                                    Lisez les messages envoyés via le formulaire de contact. 
+                                    Les messages non lus sont mis en évidence.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

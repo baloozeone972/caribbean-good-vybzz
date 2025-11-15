@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('Inscription', ~{::main})}">
+<body>
+    <main>
+        <section class="py-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card shadow-lg">
+                            <div class="card-header text-center py-4" style="background: linear-gradient(135deg, var(--caribean-primary), var(--caribean-secondary));">
+                                <h2 class="text-white mb-0">
+                                    <i class="fas fa-user-plus"></i> Inscription à l'association
+                                </h2>
+                            </div>
+                            <div class="card-body p-5">
+                                <!-- Messages de succès/erreur -->
+                                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span th:text="${success}"></span>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                                
+                                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span th:text="${error}"></span>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                                
+                                <form th:action="@{/inscription}" th:object="${inscription}" method="post">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="nom" class="form-label">
+                                                <i class="fas fa-user"></i> Nom *
+                                            </label>
+                                            <input type="text" class="form-control" id="nom" th:field="*{nom}" required>
+                                            <div class="text-danger" th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}"></div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="prenom" class="form-label">
+                                                <i class="fas fa-user"></i> Prénom *
+                                            </label>
+                                            <input type="text" class="form-control" id="prenom" th:field="*{prenom}" required>
+                                            <div class="text-danger" th:if="${#fields.hasErrors('prenom')}" th:errors="*{prenom}"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="dateNaissance" class="form-label">
+                                            <i class="fas fa-birthday-cake"></i> Date de naissance *
+                                        </label>
+                                        <input type="date" class="form-control" id="dateNaissance" th:field="*{dateNaissance}" required>
+                                        <div class="text-danger" th:if="${#fields.hasErrors('dateNaissance')}" th:errors="*{dateNaissance}"></div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="email" class="form-label">
+                                                <i class="fas fa-envelope"></i> Email *
+                                            </label>
+                                            <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                                            <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="telephone" class="form-label">
+                                                <i class="fas fa-phone"></i> Téléphone *
+                                            </label>
+                                            <input type="tel" class="form-control" id="telephone" th:field="*{telephone}" required>
+                                            <div class="text-danger" th:if="${#fields.hasErrors('telephone')}" th:errors="*{telephone}"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="adresse" class="form-label">
+                                            <i class="fas fa-map-marker-alt"></i> Adresse
+                                        </label>
+                                        <input type="text" class="form-control" id="adresse" th:field="*{adresse}">
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="codePostal" class="form-label">
+                                                <i class="fas fa-mail-bulk"></i> Code postal
+                                            </label>
+                                            <input type="text" class="form-control" id="codePostal" th:field="*{codePostal}">
+                                        </div>
+                                        
+                                        <div class="col-md-4 mb-3">
+                                            <label for="ville" class="form-label">
+                                                <i class="fas fa-city"></i> Ville
+                                            </label>
+                                            <input type="text" class="form-control" id="ville" th:field="*{ville}">
+                                        </div>
+                                        
+                                        <div class="col-md-4 mb-3">
+                                            <label for="pays" class="form-label">
+                                                <i class="fas fa-globe"></i> Pays
+                                            </label>
+                                            <input type="text" class="form-control" id="pays" th:field="*{pays}">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="motivation" class="form-label">
+                                            <i class="fas fa-comments"></i> Pourquoi souhaitez-vous rejoindre l'association ?
+                                        </label>
+                                        <textarea class="form-control" id="motivation" th:field="*{motivation}" rows="4" 
+                                                  placeholder="Parlez-nous de vos motivations..."></textarea>
+                                    </div>
+                                    
+                                    <div class="text-center mt-4">
+                                        <button type="submit" class="btn btn-caribean btn-lg px-5">
+                                            <i class="fas fa-paper-plane"></i> Envoyer mon inscription
+                                        </button>
+                                    </div>
+                                </form>
+                                
+                                <div class="mt-4 text-center">
+                                    <p class="text-muted">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Les champs marqués d'un * sont obligatoires
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
