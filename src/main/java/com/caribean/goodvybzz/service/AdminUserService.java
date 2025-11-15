@@ -4,6 +4,7 @@ import com.caribean.goodvybzz.model.AdminUser;
 import com.caribean.goodvybzz.repository.AdminUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -59,7 +60,7 @@ public class AdminUserService implements UserDetailsService {
     private final AdminUserRepository adminUserRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AdminUserService(AdminUserRepository adminUserRepository, PasswordEncoder passwordEncoder) {
+    public AdminUserService(AdminUserRepository adminUserRepository,@Lazy PasswordEncoder passwordEncoder) {
         this.adminUserRepository = adminUserRepository;
         this.passwordEncoder = passwordEncoder;
     }

@@ -7,6 +7,7 @@ import com.caribean.goodvybzz.service.ContactService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,7 +43,7 @@ public class DataInitializer implements CommandLineRunner {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataInitializer.class);
     private final AdminUserService adminUserService;
 
-    public DataInitializer(AdminUserService adminUserService) {
+    public DataInitializer(@Lazy AdminUserService adminUserService) {
         this.adminUserService = adminUserService;
     }
 
