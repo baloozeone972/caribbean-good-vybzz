@@ -1,0 +1,13 @@
+# Configuration des variables d'environnement
+# Copier ce fichier en .env et modifier les valeurs
+
+# Base de données PostgreSQL
+DB_PASSWORD=changeme123
+
+# Mot de passe administrateur
+# ⚠️ IMPORTANT : Changer ce mot de passe en production !
+ADMIN_PASSWORD=admin123
+
+# Configuration optionnelle
+# PORT=8080
+# JAVA_OPTS=-Xmx512m -Xms256m

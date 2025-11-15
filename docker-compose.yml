@@ -1,0 +1,78 @@
+# Docker Compose pour Caribbean Good Vybzz
+# Permet de lancer l'application avec PostgreSQL en un seul commande
+
+version: '3.8'
+
+services:
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: cgv-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: caribbeangoodvybzz
+      POSTGRES_USER: cgv_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme123}
+    ports:
+      - "5432:5432"
+    volumes:
+      # Persister les données
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cgv-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cgv_admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Application Spring Boot
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cgv-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Configuration de la base de données
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/caribbeangoodvybzz
+      SPRING_DATASOURCE_USERNAME: cgv_admin
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-changeme123}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      
+      # Configuration de l'application
+      SERVER_PORT: 8080
+      SPRING_PROFILES_ACTIVE: prod
+      
+      # Sécurité - À changer en production !
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+    ports:
+      - "8080:8080"
+    volumes:
+      # Persister les uploads de médias
+      - media_uploads:/app/media
+    networks:
+      - cgv-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Volumes pour persister les données
+volumes:
+  postgres_data:
+    name: cgv_postgres_data
+  media_uploads:
+    name: cgv_media_uploads
+
+# Réseau isolé pour l'application
+networks:
+  cgv-network:
+    name: cgv-network
+    driver: bridge
