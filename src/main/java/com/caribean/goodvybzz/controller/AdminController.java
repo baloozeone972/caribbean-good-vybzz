@@ -2,431 +2,358 @@ package com.caribean.goodvybzz.controller;
 
 import com.caribean.goodvybzz.model.Contact;
 import com.caribean.goodvybzz.model.Media;
-import com.caribean.goodvybzz.model.Media.MediaType;
 import com.caribean.goodvybzz.model.Member;
-import com.caribean.goodvybzz.model.Member.MemberStatus;
-import com.caribean.goodvybzz.service.AdminUserService;
+import com.caribean.goodvybzz.model.MemberStatus;
 import com.caribean.goodvybzz.service.ContactService;
 import com.caribean.goodvybzz.service.MediaService;
 import com.caribean.goodvybzz.service.MemberService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Contrôleur principal pour toutes les pages d'administration.
- * 
- * <p>Ce contrôleur gère toutes les opérations d'administration du site:</p>
- * <ul>
- *   <li>Dashboard avec statistiques</li>
- *   <li>Gestion des membres</li>
- *   <li>Gestion des messages de contact</li>
- *   <li>Gestion de la galerie de médias</li>
- * </ul>
- * 
- * <p><strong>Endpoints gérés:</strong></p>
- * <ul>
- *   <li>GET /admin/login - Page de connexion</li>
- *   <li>GET /admin/dashboard - Tableau de bord</li>
- *   <li>GET /admin/members - Liste des membres</li>
- *   <li>POST /admin/members/{id}/status - Mise à jour statut membre</li>
- *   <li>DELETE /admin/members/{id} - Suppression membre</li>
- *   <li>GET /admin/contacts - Liste des messages</li>
- *   <li>POST /admin/contacts/{id}/read - Marquer message comme lu</li>
- *   <li>DELETE /admin/contacts/{id} - Suppression message</li>
- *   <li>GET /admin/media - Gestion des médias</li>
- *   <li>POST /admin/media/upload - Upload photo</li>
- *   <li>POST /admin/media/video - Ajout vidéo</li>
- *   <li>POST /admin/media/{id}/publish - Publication média</li>
- *   <li>DELETE /admin/media/{id} - Suppression média</li>
- * </ul>
- * 
- * @author caribean Good Vybzz Development Team
+ * Contrôleur pour l'interface d'administration
+ *
+ * Gère toutes les fonctionnalités de l'espace administrateur :
+ * - Authentification et connexion
+ * - Tableau de bord avec statistiques
+ * - Gestion des membres
+ * - Gestion des messages de contact
+ * - Gestion des médias (photos et vidéos)
+ *
+ * @author Caribbean Good Vybzz Development Team
  * @version 1.0.0
- * @see MemberService
- * @see ContactService
- * @see MediaService
  */
 @Controller
 @RequestMapping("/admin")
-//@RequiredArgsConstructor
-//@Slf4j
 public class AdminController {
 
-    private final MemberService memberService;
-    private final ContactService contactService;
-    private final MediaService mediaService;
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminController.class);
+    @Autowired
+    private MemberService memberService;
 
-    public AdminController(MemberService memberService, ContactService contactService, MediaService mediaService) {
-        this.memberService = memberService;
-        this.contactService = contactService;
-        this.mediaService = mediaService;
-    }
+    @Autowired
+    private ContactService contactService;
+
+    @Autowired
+    private MediaService mediaService;
 
     /**
-     * Affiche la page de connexion admin.
-     * 
-     * @param error indique si une erreur de connexion s'est produite
-     * @param logout indique si l'utilisateur vient de se déconnecter
-     * @param model le modèle Spring MVC
-     * @return le nom de la vue login.html
+     * Affiche la page de connexion administrateur
+     *
+     * @return Le nom de la vue de connexion
      */
     @GetMapping("/login")
-    public String loginPage(
-            @RequestParam(value = "error", required = false) String error,
-            @RequestParam(value = "logout", required = false) String logout,
-            Model model) {
-        
-        log.debug("Affichage de la page de connexion admin");
-        
-        if (error != null) {
-            model.addAttribute("errorMessage", "Nom d'utilisateur ou mot de passe incorrect");
-        }
-        
-        if (logout != null) {
-            model.addAttribute("successMessage", "Vous êtes déconnecté avec succès");
-        }
-        
-        model.addAttribute("pageTitle", "Connexion Admin - caribean Good Vybzz");
+    public String login() {
         return "admin/login";
     }
 
     /**
-     * Affiche le tableau de bord administrateur.
-     * 
-     * <p>Présente les statistiques principales:</p>
-     * <ul>
-     *   <li>Nombre de membres par statut</li>
-     *   <li>Nombre de messages non lus</li>
-     *   <li>Nombre de médias publiés</li>
-     * </ul>
-     * 
-     * @param model le modèle Spring MVC
-     * @return le nom de la vue dashboard.html
+     * Affiche le tableau de bord administrateur
+     *
+     * @param model Le modèle pour passer les données à la vue
+     * @return Le nom de la vue du tableau de bord
      */
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        log.debug("Affichage du dashboard admin");
-        
-        // Statistiques membres
-        long activeMembers = memberService.countMembersByStatus(MemberStatus.ACTIF);
-        long pendingMembers = memberService.countMembersByStatus(MemberStatus.EN_ATTENTE);
-        long inactiveMembers = memberService.countMembersByStatus(MemberStatus.INACTIF);
-        
-        // Statistiques messages
-        long unreadMessages = contactService.countUnreadMessages();
-        
-        // Statistiques médias
-        long publishedPhotos = mediaService.getPublishedMediaByType(MediaType.PHOTO).size();
-        long publishedVideos = mediaService.getPublishedMediaByType(MediaType.VIDEO).size();
-        
-        model.addAttribute("activeMembers", activeMembers);
+        // Statistiques générales
+        model.addAttribute("totalMembers", memberService.getAllMembers().size());
+        model.addAttribute("activeMembers",
+                memberService.getAllMembers().stream()
+                        .filter(m -> m.getStatus() == MemberStatus.ACTIVE)
+                        .count());
+        model.addAttribute("unreadMessages",
+                contactService.getAllContacts().stream()
+                        .filter(c -> !c.isRead())
+                        .count());
+        model.addAttribute("publishedMedia",
+                mediaService.getAllMedia().stream()
+                        .filter(Media::isPublished)
+                        .count());
+
+        // Membres en attente de validation
+        List<Member> pendingMembers = memberService.getAllMembers().stream()
+                .filter(m -> m.getStatus() == MemberStatus.PENDING)
+                .limit(5)
+                .collect(Collectors.toList());
         model.addAttribute("pendingMembers", pendingMembers);
-        model.addAttribute("inactiveMembers", inactiveMembers);
-        model.addAttribute("unreadMessages", unreadMessages);
-        model.addAttribute("publishedPhotos", publishedPhotos);
-        model.addAttribute("publishedVideos", publishedVideos);
-        model.addAttribute("pageTitle", "Dashboard - caribean Good Vybzz");
-        
+
+        // Messages récents non lus
+        List<Contact> recentMessages = contactService.getAllContacts().stream()
+                .filter(c -> !c.isRead())
+                .limit(5)
+                .collect(Collectors.toList());
+        model.addAttribute("recentMessages", recentMessages);
+
         return "admin/dashboard";
     }
 
     /**
-     * Affiche la liste de tous les membres.
-     * 
-     * @param model le modèle Spring MVC
-     * @return le nom de la vue members.html
+     * Affiche la page de gestion des membres
+     *
+     * @param status Filtre optionnel par statut
+     * @param model Le modèle pour passer les données à la vue
+     * @return Le nom de la vue de gestion des membres
      */
     @GetMapping("/members")
-    public String listMembers(Model model) {
-        log.debug("Affichage de la liste des membres");
-        
-        List<Member> members = memberService.getAllMembers();
+    public String members(@RequestParam(required = false) String status, Model model) {
+        List<Member> members;
+
+        if (status != null && !status.isEmpty()) {
+            try {
+                MemberStatus memberStatus = MemberStatus.valueOf(status.toUpperCase());
+                members = memberService.getAllMembers().stream()
+                        .filter(m -> m.getStatus() == memberStatus)
+                        .collect(Collectors.toList());
+            } catch (IllegalArgumentException e) {
+                members = memberService.getAllMembers();
+            }
+        } else {
+            members = memberService.getAllMembers();
+        }
+
         model.addAttribute("members", members);
-        model.addAttribute("pageTitle", "Gestion des Membres - caribean Good Vybzz");
-        
         return "admin/members";
     }
 
     /**
-     * Met à jour le statut d'un membre.
-     * 
-     * @param id l'ID du membre
-     * @param status le nouveau statut
-     * @param redirectAttributes les attributs pour le message flash
-     * @return redirection vers la liste des membres
+     * Approuve un membre (change son statut à ACTIVE)
+     *
+     * @param id L'identifiant du membre
+     * @param redirectAttributes Attributs pour le message flash
+     * @return Redirection vers la page des membres
      */
-    @PostMapping("/members/{id}/status")
-    public String updateMemberStatus(
-            @PathVariable Long id,
-            @RequestParam MemberStatus status,
-            RedirectAttributes redirectAttributes) {
-        
-        log.debug("Mise à jour du statut du membre {} vers {}", id, status);
-        
+    @PostMapping("/members/approve/{id}")
+    public String approveMember(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            memberService.updateMemberStatus(id, status);
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Statut du membre mis à jour avec succès");
+            Member member = memberService.getMemberById(id);
+            if (member != null) {
+                member.setStatus(MemberStatus.ACTIVE);
+                memberService.saveMember(member);
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Le membre " + member.getFirstName() + " " + member.getLastName() + " a été approuvé.");
+            }
         } catch (Exception e) {
-            log.error("Erreur lors de la mise à jour du statut: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Erreur lors de la mise à jour du statut");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Erreur lors de l'approbation du membre.");
         }
-        
         return "redirect:/admin/members";
     }
 
     /**
-     * Supprime un membre.
-     * 
-     * @param id l'ID du membre à supprimer
-     * @param redirectAttributes les attributs pour le message flash
-     * @return redirection vers la liste des membres
+     * Change le statut d'un membre
+     *
+     * @param id L'identifiant du membre
+     * @param status Le nouveau statut
+     * @param redirectAttributes Attributs pour le message flash
+     * @return Redirection vers la page des membres
      */
-    @DeleteMapping("/members/{id}")
-    @PostMapping("/members/{id}/delete")
-    public String deleteMember(
-            @PathVariable Long id,
-            RedirectAttributes redirectAttributes) {
-        
-        log.debug("Suppression du membre {}", id);
-        
+    @PostMapping("/members/status/{id}")
+    public String changeMemberStatus(@PathVariable Long id,
+                                     @RequestParam String status,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            Member member = memberService.getMemberById(id);
+            if (member != null) {
+                MemberStatus newStatus = MemberStatus.valueOf(status.toUpperCase());
+                member.setStatus(newStatus);
+                memberService.saveMember(member);
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Le statut du membre a été modifié.");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Erreur lors de la modification du statut.");
+        }
+        return "redirect:/admin/members";
+    }
+
+    /**
+     * Supprime un membre
+     *
+     * @param id L'identifiant du membre
+     * @param redirectAttributes Attributs pour le message flash
+     * @return Redirection vers la page des membres
+     */
+    @PostMapping("/members/delete/{id}")
+    public String deleteMember(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             memberService.deleteMember(id);
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Membre supprimé avec succès");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Le membre a été supprimé.");
         } catch (Exception e) {
-            log.error("Erreur lors de la suppression: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Erreur lors de la suppression");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Erreur lors de la suppression du membre.");
         }
-        
         return "redirect:/admin/members";
     }
 
     /**
-     * Affiche la liste de tous les messages de contact.
-     * 
-     * @param model le modèle Spring MVC
-     * @return le nom de la vue contacts.html
+     * Affiche la page de gestion des messages de contact
+     *
+     * @param filter Filtre optionnel (unread, read)
+     * @param model Le modèle pour passer les données à la vue
+     * @return Le nom de la vue de gestion des messages
      */
     @GetMapping("/contacts")
-    public String listContacts(Model model) {
-        log.debug("Affichage de la liste des messages de contact");
-        
-        List<Contact> contacts = contactService.getAllContacts();
-        long unreadCount = contactService.countUnreadMessages();
-        
+    public String contacts(@RequestParam(required = false) String filter, Model model) {
+        List<Contact> contacts;
+
+        if ("unread".equals(filter)) {
+            contacts = contactService.getAllContacts().stream()
+                    .filter(c -> !c.isRead())
+                    .collect(Collectors.toList());
+        } else if ("read".equals(filter)) {
+            contacts = contactService.getAllContacts().stream()
+                    .filter(Contact::isRead)
+                    .collect(Collectors.toList());
+        } else {
+            contacts = contactService.getAllContacts();
+        }
+
         model.addAttribute("contacts", contacts);
-        model.addAttribute("unreadCount", unreadCount);
-        model.addAttribute("pageTitle", "Messages de Contact - caribean Good Vybzz");
-        
         return "admin/contacts";
     }
 
     /**
-     * Marque un message comme lu.
-     * 
-     * @param id l'ID du message
-     * @param redirectAttributes les attributs pour le message flash
-     * @return redirection vers la liste des messages
+     * Bascule le statut lu/non lu d'un message
+     *
+     * @param id L'identifiant du message
+     * @param redirectAttributes Attributs pour le message flash
+     * @return Redirection vers la page des messages
      */
-    @PostMapping("/contacts/{id}/read")
-    public String markContactAsRead(
-            @PathVariable Long id,
-            RedirectAttributes redirectAttributes) {
-        
-        log.debug("Marquage du message {} comme lu", id);
-        
+    @PostMapping("/contacts/toggle-read/{id}")
+    public String toggleReadStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            contactService.markAsRead(id);
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Message marqué comme lu");
+            Contact contact = contactService.getContactById(id);
+            if (contact != null) {
+                contact.setRead(!contact.isRead());
+                contactService.saveContact(contact);
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Le statut du message a été modifié.");
+            }
         } catch (Exception e) {
-            log.error("Erreur lors du marquage: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Erreur lors de l'opération");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Erreur lors de la modification du statut.");
         }
-        
         return "redirect:/admin/contacts";
     }
 
     /**
-     * Supprime un message de contact.
-     * 
-     * @param id l'ID du message à supprimer
-     * @param redirectAttributes les attributs pour le message flash
-     * @return redirection vers la liste des messages
+     * Supprime un message de contact
+     *
+     * @param id L'identifiant du message
+     * @param redirectAttributes Attributs pour le message flash
+     * @return Redirection vers la page des messages
      */
-    @DeleteMapping("/contacts/{id}")
-    @PostMapping("/contacts/{id}/delete")
-    public String deleteContact(
-            @PathVariable Long id,
-            RedirectAttributes redirectAttributes) {
-        
-        log.debug("Suppression du message {}", id);
-        
+    @PostMapping("/contacts/delete/{id}")
+    public String deleteContact(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             contactService.deleteContact(id);
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Message supprimé avec succès");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Le message a été supprimé.");
         } catch (Exception e) {
-            log.error("Erreur lors de la suppression: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Erreur lors de la suppression");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Erreur lors de la suppression du message.");
         }
-        
         return "redirect:/admin/contacts";
     }
 
     /**
-     * Affiche la page de gestion des médias.
-     * 
-     * @param model le modèle Spring MVC
-     * @return le nom de la vue manage-media.html
+     * Affiche la page de gestion des médias
+     *
+     * @param filter Filtre optionnel (photos, videos, published, unpublished)
+     * @param model Le modèle pour passer les données à la vue
+     * @return Le nom de la vue de gestion des médias
      */
     @GetMapping("/media")
-    public String manageMedia(Model model) {
-        log.debug("Affichage de la page de gestion des médias");
-        
-        List<Media> allMedia = mediaService.getAllMedia();
-        model.addAttribute("mediaList", allMedia);
-        model.addAttribute("newMedia", new Media());
-        model.addAttribute("pageTitle", "Gestion des Médias - caribean Good Vybzz");
-        
+    public String media(@RequestParam(required = false) String filter, Model model) {
+        List<Media> mediaList;
+
+        if ("photos".equals(filter)) {
+            mediaList = mediaService.getAllMedia().stream()
+                    .filter(m -> m.getType() == Media.MediaType.PHOTO)
+                    .collect(Collectors.toList());
+        } else if ("videos".equals(filter)) {
+            mediaList = mediaService.getAllMedia().stream()
+                    .filter(m -> m.getType() == Media.MediaType.VIDEO)
+                    .collect(Collectors.toList());
+        } else if ("published".equals(filter)) {
+            mediaList = mediaService.getAllMedia().stream()
+                    .filter(Media::isPublished)
+                    .collect(Collectors.toList());
+        } else if ("unpublished".equals(filter)) {
+            mediaList = mediaService.getAllMedia().stream()
+                    .filter(m -> !m.isPublished())
+                    .collect(Collectors.toList());
+        } else {
+            mediaList = mediaService.getAllMedia();
+        }
+
+        model.addAttribute("mediaList", mediaList);
         return "admin/manage-media";
     }
 
     /**
-     * Upload une nouvelle photo.
-     * 
-     * @param file le fichier image
-     * @param title le titre de la photo
-     * @param description la description
-     * @param redirectAttributes les attributs pour le message flash
-     * @return redirection vers la page de gestion des médias
+     * Bascule le statut publié/non publié d'un média
+     *
+     * @param id L'identifiant du média
+     * @param redirectAttributes Attributs pour le message flash
+     * @return Redirection vers la page des médias
      */
-    @PostMapping("/media/upload")
-    public String uploadPhoto(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("title") String title,
-            @RequestParam(value = "description", required = false) String description,
-            RedirectAttributes redirectAttributes) {
-        
-        log.debug("Upload d'une nouvelle photo: {}", title);
-        
+    @PostMapping("/media/toggle-publish/{id}")
+    public String togglePublishStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            if (file.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", 
-                    "Veuillez sélectionner un fichier");
-                return "redirect:/admin/media";
+            Media media = mediaService.getMediaById(id);
+            if (media != null) {
+                media.setPublished(!media.isPublished());
+                mediaService.saveMedia(media);
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Le statut de publication du média a été modifié.");
             }
-            
-            mediaService.uploadPhoto(file, title, description);
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Photo uploadée avec succès");
-        } catch (IOException e) {
-            log.error("Erreur lors de l'upload: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Erreur lors de l'upload du fichier");
-        }
-        
-        return "redirect:/admin/media";
-    }
-
-    /**
-     * Ajoute une nouvelle vidéo (URL YouTube, Vimeo, etc.).
-     * 
-     * @param media l'objet Media contenant les infos de la vidéo
-     * @param redirectAttributes les attributs pour le message flash
-     * @return redirection vers la page de gestion des médias
-     */
-    @PostMapping("/media/video")
-    public String addVideo(
-            @ModelAttribute("newMedia") Media media,
-            RedirectAttributes redirectAttributes) {
-        
-        log.debug("Ajout d'une nouvelle vidéo: {}", media.getTitle());
-        
-        try {
-            media.setType(MediaType.VIDEO);
-            mediaService.saveMedia(media);
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Vidéo ajoutée avec succès");
         } catch (Exception e) {
-            log.error("Erreur lors de l'ajout de la vidéo: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Erreur lors de l'ajout de la vidéo");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Erreur lors de la modification du statut.");
         }
-        
         return "redirect:/admin/media";
     }
 
     /**
-     * Change le statut de publication d'un média.
-     * 
-     * @param id l'ID du média
-     * @param isPublished le nouveau statut
-     * @param redirectAttributes les attributs pour le message flash
-     * @return redirection vers la page de gestion des médias
+     * Supprime un média
+     *
+     * @param id L'identifiant du média
+     * @param redirectAttributes Attributs pour le message flash
+     * @return Redirection vers la page des médias
      */
-    @PostMapping("/media/{id}/publish")
-    public String toggleMediaPublishStatus(
-            @PathVariable Long id,
-            @RequestParam boolean isPublished,
-            RedirectAttributes redirectAttributes) {
-        
-        log.debug("Changement du statut de publication du média {} vers {}", id, isPublished);
-        
-        try {
-            mediaService.togglePublishStatus(id, isPublished);
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Statut de publication mis à jour");
-        } catch (Exception e) {
-            log.error("Erreur lors de la mise à jour: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Erreur lors de la mise à jour");
-        }
-        
-        return "redirect:/admin/media";
-    }
-
-    /**
-     * Supprime un média.
-     * 
-     * @param id l'ID du média à supprimer
-     * @param redirectAttributes les attributs pour le message flash
-     * @return redirection vers la page de gestion des médias
-     */
-    @DeleteMapping("/media/{id}")
-    @PostMapping("/media/{id}/delete")
-    public String deleteMedia(
-            @PathVariable Long id,
-            RedirectAttributes redirectAttributes) {
-        
-        log.debug("Suppression du média {}", id);
-        
+    @PostMapping("/media/delete/{id}")
+    public String deleteMedia(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             mediaService.deleteMedia(id);
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Média supprimé avec succès");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Le média a été supprimé.");
         } catch (Exception e) {
-            log.error("Erreur lors de la suppression: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Erreur lors de la suppression");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Erreur lors de la suppression du média.");
         }
-        
+        return "redirect:/admin/media";
+    }
+
+    /**
+     * Ajoute un nouveau média
+     * Note: Cette méthode devrait être complétée avec la gestion de l'upload de fichiers
+     *
+     * @param redirectAttributes Attributs pour le message flash
+     * @return Redirection vers la page des médias
+     */
+    @PostMapping("/media/add")
+    public String addMedia(RedirectAttributes redirectAttributes) {
+        // TODO: Implémenter l'ajout de média avec upload de fichiers
+        redirectAttributes.addFlashAttribute("errorMessage",
+                "La fonctionnalité d'ajout de média n'est pas encore implémentée.");
         return "redirect:/admin/media";
     }
 }

@@ -1,68 +1,63 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(pageTitle='Gestion des Membres', content=~{::content})}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Membres - caribean Good Vybzz</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Gestion des Membres</title>
 </head>
 <body>
-    <!-- Header Admin -->
-    <header class="admin-header">
-        <div class="header-container">
-            <div class="logo-section">
-                <img th:src="@{/images/logo.jpg}" alt="Logo caribean Good Vybzz" class="logo">
-                <h1 class="site-title">caribean Good Vybzz - Admin</h1>
+    <div th:fragment="content">
+        <!-- Filtres et recherche -->
+        <div class="content-section">
+            <div class="row align-items-center mb-3">
+                <div class="col-md-8">
+                    <h2 class="mb-0">
+                        <i class="fas fa-users"></i> Liste des Membres
+                    </h2>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="badge bg-primary fs-5">
+                        Total : <span th:text="${members != null ? members.size() : 0}">0</span> membre(s)
+                    </span>
+                </div>
             </div>
-            <nav>
-                <ul>
-                    <li><a th:href="@{/admin/dashboard}">Dashboard</a></li>
-                    <li><a th:href="@{/admin/members}">Membres</a></li>
-                    <li><a th:href="@{/admin/contacts}">Messages</a></li>
-                    <li><a th:href="@{/admin/media}">Médias</a></li>
-                    <li><a th:href="@{/}">Voir le site</a></li>
-                    <li>
-                        <form th:action="@{/admin/logout}" method="post" style="display: inline;">
-                            <button type="submit" class="btn btn-danger" 
-                                    style="padding: 8px 15px; font-size: 0.9rem;">
-                                Déconnexion
-                            </button>
-                        </form>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="container">
-        <h1>Gestion des Membres</h1>
-        
-        <!-- Messages -->
-        <div th:if="${successMessage}" class="alert alert-success">
-            <span th:text="${successMessage}">Message de succès</span>
-        </div>
-        
-        <div th:if="${errorMessage}" class="alert alert-error">
-            <span th:text="${errorMessage}">Message d'erreur</span>
-        </div>
-        
-        <div class="card">
-            <h2>Liste des Membres (<span th:text="${members.size()}">0</span>)</h2>
-            
-            <div th:if="${members.isEmpty()}" class="alert alert-info">
-                <p>Aucun membre inscrit pour le moment.</p>
+            <!-- Filtres par statut -->
+            <div class="btn-group mb-3" role="group">
+                <a href="/admin/members" class="btn btn-outline-primary" 
+                   th:classappend="${param.status == null ? 'active' : ''}">
+                    <i class="fas fa-list"></i> Tous
+                </a>
+                <a href="/admin/members?status=PENDING" class="btn btn-outline-warning"
+                   th:classappend="${param.status != null and param.status[0] == 'PENDING' ? 'active' : ''}">
+                    <i class="fas fa-clock"></i> En attente
+                </a>
+                <a href="/admin/members?status=ACTIVE" class="btn btn-outline-success"
+                   th:classappend="${param.status != null and param.status[0] == 'ACTIVE' ? 'active' : ''}">
+                    <i class="fas fa-check-circle"></i> Actifs
+                </a>
+                <a href="/admin/members?status=INACTIVE" class="btn btn-outline-secondary"
+                   th:classappend="${param.status != null and param.status[0] == 'INACTIVE' ? 'active' : ''}">
+                    <i class="fas fa-times-circle"></i> Inactifs
+                </a>
             </div>
-            
-            <div th:unless="${members.isEmpty()}" style="overflow-x: auto;">
-                <table>
+        </div>
+
+        <!-- Tableau des membres -->
+        <div class="content-section">
+            <div th:if="${members == null or #lists.isEmpty(members)}" class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Aucun membre trouvé.
+            </div>
+
+            <div th:if="${members != null and !#lists.isEmpty(members)}" class="table-responsive custom-table">
+                <table class="table table-hover mb-0">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Nom Complet</th>
                             <th>Email</th>
                             <th>Téléphone</th>
-                            <th>Date d'Inscription</th>
+                            <th>Adresse</th>
+                            <th>Date d'inscription</th>
                             <th>Statut</th>
                             <th>Actions</th>
                         </tr>
@@ -70,63 +65,118 @@
                     <tbody>
                         <tr th:each="member : ${members}">
                             <td th:text="${member.id}">1</td>
-                            <td th:text="${member.fullName}">John Doe</td>
-                            <td th:text="${member.email}">john@example.com</td>
-                            <td th:text="${member.phone}">+33 6 12 34 56 78</td>
-                            <td th:text="${#temporals.format(member.registrationDate, 'dd/MM/yyyy HH:mm')}">
-                                15/01/2025 10:30
+                            <td>
+                                <strong th:text="${member.firstName + ' ' + member.lastName}">Nom Prénom</strong>
                             </td>
                             <td>
-                                <span class="badge"
-                                      th:classappend="${member.status.name() == 'ACTIF'} ? 'badge-success' : 
-                                                      (${member.status.name() == 'EN_ATTENTE'} ? 'badge-warning' : 'badge-danger')"
-                                      th:text="${member.status}">
-                                    ACTIF
+                                <a th:href="'mailto:' + ${member.email}" th:text="${member.email}">email@example.com</a>
+                            </td>
+                            <td th:text="${member.phone}">0690000000</td>
+                            <td th:text="${member.address}">Adresse</td>
+                            <td th:text="${#temporals.format(member.membershipDate, 'dd/MM/yyyy')}">01/01/2025</td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${member.status.name() == 'PENDING' ? 'badge-pending' : 
+                                                        member.status.name() == 'ACTIVE' ? 'badge-active' : 'badge-inactive'}">
+                                    <span th:text="${member.status.name() == 'PENDING' ? 'En attente' : 
+                                                     member.status.name() == 'ACTIVE' ? 'Actif' : 'Inactif'}">Statut</span>
                                 </span>
                             </td>
                             <td>
-                                <!-- Boutons de changement de statut -->
-                                <form th:action="@{/admin/members/{id}/status(id=${member.id})}" 
-                                      method="post" 
-                                      style="display: inline;">
-                                    <select name="status" onchange="this.form.submit()" 
-                                            style="padding: 5px; border-radius: 3px;">
-                                        <option value="ACTIF" th:selected="${member.status.name() == 'ACTIF'}">
-                                            Actif
-                                        </option>
-                                        <option value="EN_ATTENTE" th:selected="${member.status.name() == 'EN_ATTENTE'}">
-                                            En Attente
-                                        </option>
-                                        <option value="INACTIF" th:selected="${member.status.name() == 'INACTIF'}">
-                                            Inactif
-                                        </option>
-                                    </select>
-                                </form>
-                                
-                                <!-- Bouton de suppression -->
-                                <form th:action="@{/admin/members/{id}/delete(id=${member.id})}" 
-                                      method="post" 
-                                      style="display: inline;">
-                                    <button type="submit" 
-                                            class="btn btn-danger" 
-                                            style="padding: 5px 10px; font-size: 0.85rem;"
-                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce membre ?')">
-                                        🗑️ Supprimer
-                                    </button>
-                                </form>
+                                <div class="btn-group" role="group">
+                                    <!-- Bouton Approuver (si en attente) -->
+                                    <form th:if="${member.status.name() == 'PENDING'}" 
+                                          th:action="@{/admin/members/approve/{id}(id=${member.id})}" 
+                                          method="post" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-success" title="Approuver">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Bouton Changer statut -->
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-warning dropdown-toggle" 
+                                                data-bs-toggle="dropdown" title="Changer le statut">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <form th:action="@{/admin/members/status/{id}(id=${member.id})}" 
+                                                      method="post" class="dropdown-item">
+                                                    <input type="hidden" name="status" value="ACTIVE">
+                                                    <button type="submit" class="btn btn-link text-success text-decoration-none p-0">
+                                                        <i class="fas fa-check-circle"></i> Activer
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form th:action="@{/admin/members/status/{id}(id=${member.id})}" 
+                                                      method="post" class="dropdown-item">
+                                                    <input type="hidden" name="status" value="INACTIVE">
+                                                    <button type="submit" class="btn btn-link text-secondary text-decoration-none p-0">
+                                                        <i class="fas fa-times-circle"></i> Désactiver
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form th:action="@{/admin/members/status/{id}(id=${member.id})}" 
+                                                      method="post" class="dropdown-item">
+                                                    <input type="hidden" name="status" value="PENDING">
+                                                    <button type="submit" class="btn btn-link text-warning text-decoration-none p-0">
+                                                        <i class="fas fa-clock"></i> En attente
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Bouton Supprimer -->
+                                    <form th:action="@{/admin/members/delete/{id}(id=${member.id})}" 
+                                          method="post" 
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce membre ?');" 
+                                          style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-    </main>
 
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2025 caribean Good Vybzz. Tous droits réservés.</p>
-    </footer>
-
-    <script th:src="@{/js/script.js}"></script>
+        <!-- Statistiques -->
+        <div class="content-section">
+            <h3><i class="fas fa-chart-bar"></i> Statistiques</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-warning">En attente</h5>
+                            <h2 class="card-text" th:text="${members != null ? #lists.size(members.?[status.name() == 'PENDING']) : 0}">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">Actifs</h5>
+                            <h2 class="card-text" th:text="${members != null ? #lists.size(members.?[status.name() == 'ACTIVE']) : 0}">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-secondary">Inactifs</h5>
+                            <h2 class="card-text" th:text="${members != null ? #lists.size(members.?[status.name() == 'INACTIVE']) : 0}">0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

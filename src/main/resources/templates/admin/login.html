@@ -3,106 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion Admin - caribean Good Vybzz</title>
+    <title>Connexion Administration - Caribbean Good Vybzz</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        :root {
+            --primary-color: #FF6B35;
+            --secondary-color: #FFB100;
+            --accent-color: #4ECDC4;
+            --dark-bg: #2C3E50;
+        }
+
         body {
-            background: linear-gradient(135deg, #FFD700, #FF6347);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
-        .login-card {
+
+        .login-container {
             max-width: 450px;
-            margin: auto;
+            width: 100%;
+            padding: 20px;
         }
-        
-        .logo-container {
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
             text-align: center;
             margin-bottom: 30px;
         }
-        
-        .logo-container img {
-            max-width: 200px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+
+        .login-header .logo {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .login-header h2 {
+            color: var(--dark-bg);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .form-floating {
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            padding: 12px;
+            width: 100%;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            color: #666;
+            padding: 10px;
+            width: 100%;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-back:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .form-floating {
+            position: relative;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .footer-text a {
+            color: white;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-12">
-                <div class="logo-container">
-                    <img th:src="@{/images/logo.jpeg}" alt="caribean Good Vybzz Logo">
+    <div class="login-container">
+        <div class="login-card">
+            <!-- En-tête -->
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fas fa-palm-tree"></i>
                 </div>
-                
-                <div class="card shadow-lg login-card">
-                    <div class="card-header bg-dark text-white text-center py-4">
-                        <h3 class="mb-0">
-                            <i class="fas fa-lock"></i> Connexion Administrateur
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <!-- Message d'erreur -->
-                        <div th:if="${param.error}" class="alert alert-danger" role="alert">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            Nom d'utilisateur ou mot de passe incorrect.
-                        </div>
-                        
-                        <!-- Message de déconnexion -->
-                        <div th:if="${param.logout}" class="alert alert-success" role="alert">
-                            <i class="fas fa-check-circle"></i>
-                            Vous avez été déconnecté avec succès.
-                        </div>
-                        
-                        <form th:action="@{/admin/login}" method="post">
-                            <div class="mb-4">
-                                <label for="username" class="form-label">
-                                    <i class="fas fa-user"></i> Nom d'utilisateur
-                                </label>
-                                <input type="text" class="form-control form-control-lg" 
-                                       id="username" name="username" required autofocus>
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label for="password" class="form-label">
-                                    <i class="fas fa-key"></i> Mot de passe
-                                </label>
-                                <input type="password" class="form-control form-control-lg" 
-                                       id="password" name="password" required>
-                            </div>
-                            
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-dark btn-lg">
-                                    <i class="fas fa-sign-in-alt"></i> Se connecter
-                                </button>
-                            </div>
-                        </form>
-                        
-                        <div class="text-center mt-4">
-                            <a href="/" class="text-decoration-none">
-                                <i class="fas fa-arrow-left"></i> Retour au site
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <p class="text-center text-white mt-4">
-                    &copy; 2025 caribean Good Vybzz - Tous droits réservés
-                </p>
+                <h2>Caribbean Good Vybzz</h2>
+                <p>Administration</p>
             </div>
+
+            <!-- Message d'erreur -->
+            <div th:if="${param.error}" class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                <strong>Erreur de connexion !</strong><br>
+                Nom d'utilisateur ou mot de passe incorrect.
+            </div>
+
+            <!-- Message de déconnexion -->
+            <div th:if="${param.logout}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                Vous avez été déconnecté avec succès.
+            </div>
+
+            <!-- Formulaire de connexion -->
+            <form th:action="@{/login}" method="post">
+                <!-- Nom d'utilisateur -->
+                <div class="form-floating">
+                    <input type="text" 
+                           class="form-control" 
+                           id="username" 
+                           name="username" 
+                           placeholder="Nom d'utilisateur" 
+                           required 
+                           autofocus>
+                    <label for="username">
+                        <i class="fas fa-user"></i> Nom d'utilisateur
+                    </label>
+                </div>
+
+                <!-- Mot de passe -->
+                <div class="form-floating">
+                    <input type="password" 
+                           class="form-control" 
+                           id="password" 
+                           name="password" 
+                           placeholder="Mot de passe" 
+                           required>
+                    <label for="password">
+                        <i class="fas fa-lock"></i> Mot de passe
+                    </label>
+                    <span class="password-toggle" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="toggleIcon"></i>
+                    </span>
+                </div>
+
+                <!-- Case à cocher "Se souvenir de moi" -->
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="remember-me" name="remember-me">
+                    <label class="form-check-label" for="remember-me">
+                        Se souvenir de moi
+                    </label>
+                </div>
+
+                <!-- Bouton de connexion -->
+                <button type="submit" class="btn btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Se Connecter
+                </button>
+
+                <!-- Bouton retour au site -->
+                <a href="/" class="btn btn-back">
+                    <i class="fas fa-arrow-left"></i> Retour au site
+                </a>
+            </form>
+        </div>
+
+        <!-- Pied de page -->
+        <div class="footer-text">
+            <p>
+                <i class="fas fa-shield-alt"></i> Connexion sécurisée<br>
+                &copy; 2025 Caribbean Good Vybzz - Tous droits réservés
+            </p>
         </div>
     </div>
-    
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script pour afficher/masquer le mot de passe -->
+    <script>
+        function togglePassword() {
+            var passwordField = document.getElementById('password');
+            var toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </body>
 </html>

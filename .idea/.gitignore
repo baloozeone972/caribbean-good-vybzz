@@ -3,3 +3,9 @@
 /workspace.xml
 # Environment-dependent path to Maven home directory
 /mavenHomeManager.xml
+/compiler.xml
+/easycode.ignore
+/encodings.xml
+/jarRepositories.xml
+/misc.xml
+/vcs.xml
