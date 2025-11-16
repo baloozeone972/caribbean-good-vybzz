@@ -5,173 +5,173 @@
     <title>Tableau de bord</title>
 </head>
 <body>
-    <div th:fragment="content">
-        <!-- Statistiques -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="stat-card text-center">
-                    <div class="icon" style="color: #FF6B35;">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3 th:text="${totalMembers ?: 0}">0</h3>
-                    <p>Membres Total</p>
+<div th:fragment="content">
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card text-center">
+                <div class="icon" style="color: #FF6B35;">
+                    <i class="fas fa-users"></i>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card text-center">
-                    <div class="icon" style="color: #28A745;">
-                        <i class="fas fa-user-check"></i>
-                    </div>
-                    <h3 th:text="${activeMembers ?: 0}">0</h3>
-                    <p>Membres Actifs</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card text-center">
-                    <div class="icon" style="color: #FFC107;">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <h3 th:text="${unreadMessages ?: 0}">0</h3>
-                    <p>Messages Non Lus</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card text-center">
-                    <div class="icon" style="color: #4ECDC4;">
-                        <i class="fas fa-images"></i>
-                    </div>
-                    <h3 th:text="${publishedMedia ?: 0}">0</h3>
-                    <p>Médias Publiés</p>
-                </div>
+                <h3 th:text="${totalMembers ?: 0}">0</h3>
+                <p>Membres Total</p>
             </div>
         </div>
-
-        <!-- Membres en attente -->
-        <div class="content-section" th:if="${pendingMembers != null and !#lists.isEmpty(pendingMembers)}">
-            <h2 class="section-title">
-                <i class="fas fa-user-clock"></i> Membres en Attente de Validation
-            </h2>
-            <div class="table-responsive custom-table">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Email</th>
-                            <th>Téléphone</th>
-                            <th>Date d'inscription</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="member : ${pendingMembers}">
-                            <td th:text="${member.firstName + ' ' + member.lastName}">Nom Prénom</td>
-                            <td th:text="${member.email}">email@example.com</td>
-                            <td th:text="${member.phone}">0690000000</td>
-                            <td th:text="${#temporals.format(member.membershipDate, 'dd/MM/yyyy')}">01/01/2025</td>
-                            <td>
-                                <form th:action="@{/admin/members/approve/{id}(id=${member.id})}" method="post" style="display: inline;">
-                                    <button type="submit" class="btn btn-sm btn-success" title="Approuver">
-                                        <i class="fas fa-check"></i> Approuver
-                                    </button>
-                                </form>
-                                <a th:href="@{/admin/members}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-eye"></i> Voir tout
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div class="col-md-3">
+            <div class="stat-card text-center">
+                <div class="icon" style="color: #28A745;">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <h3 th:text="${activeMembers ?: 0}">0</h3>
+                <p>Membres Actifs</p>
             </div>
         </div>
-
-        <!-- Messages récents non lus -->
-        <div class="content-section" th:if="${recentMessages != null and !#lists.isEmpty(recentMessages)}">
-            <h2 class="section-title">
-                <i class="fas fa-envelope-open-text"></i> Messages Récents
-            </h2>
-            <div class="table-responsive custom-table">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Email</th>
-                            <th>Sujet</th>
-                            <th>Date</th>
-                            <th>Statut</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="contact : ${recentMessages}">
-                            <td th:text="${contact.name}">Nom</td>
-                            <td th:text="${contact.email}">email@example.com</td>
-                            <td th:text="${contact.subject}">Sujet</td>
-                            <td th:text="${#temporals.format(contact.submittedAt, 'dd/MM/yyyy HH:mm')}">01/01/2025 10:00</td>
-                            <td>
-                                <span class="badge" th:classappend="${contact.read ? 'bg-secondary' : 'badge-pending'}">
-                                    <span th:text="${contact.read ? 'Lu' : 'Non lu'}">Non lu</span>
-                                </span>
-                            </td>
-                            <td>
-                                <a th:href="@{/admin/contacts}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-eye"></i> Voir
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div class="col-md-3">
+            <div class="stat-card text-center">
+                <div class="icon" style="color: #FFC107;">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h3 th:text="${unreadMessages ?: 0}">0</h3>
+                <p>Messages Non Lus</p>
             </div>
         </div>
-
-        <!-- Actions rapides -->
-        <div class="content-section">
-            <h2 class="section-title">
-                <i class="fas fa-bolt"></i> Actions Rapides
-            </h2>
-            <div class="row">
-                <div class="col-md-3 mb-3">
-                    <a href="/admin/members" class="btn btn-primary-custom w-100 py-3">
-                        <i class="fas fa-users fa-2x mb-2"></i><br>
-                        Gérer les Membres
-                    </a>
+        <div class="col-md-3">
+            <div class="stat-card text-center">
+                <div class="icon" style="color: #4ECDC4;">
+                    <i class="fas fa-images"></i>
                 </div>
-                <div class="col-md-3 mb-3">
-                    <a href="/admin/contacts" class="btn btn-primary-custom w-100 py-3">
-                        <i class="fas fa-envelope fa-2x mb-2"></i><br>
-                        Voir les Messages
-                    </a>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <a href="/admin/media" class="btn btn-primary-custom w-100 py-3">
-                        <i class="fas fa-images fa-2x mb-2"></i><br>
-                        Gérer les Médias
-                    </a>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <a href="/" target="_blank" class="btn btn-outline-primary w-100 py-3">
-                        <i class="fas fa-globe fa-2x mb-2"></i><br>
-                        Voir le Site
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Informations système -->
-        <div class="content-section">
-            <h2 class="section-title">
-                <i class="fas fa-info-circle"></i> Informations
-            </h2>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Version de l'application :</strong> 1.0.0</p>
-                    <p><strong>Environnement :</strong> <span th:text="${@environment.getActiveProfiles().length > 0 ? @environment.getActiveProfiles()[0] : 'default'}">production</span></p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Date du jour :</strong> <span th:text="${#temporals.format(#temporals.createNow(), 'dd MMMM yyyy', new java.util.Locale('fr'))}">16 novembre 2025</span></p>
-                    <p><strong>Base de données :</strong> PostgreSQL / H2</p>
-                </div>
+                <h3 th:text="${publishedMedia ?: 0}">0</h3>
+                <p>Médias Publiés</p>
             </div>
         </div>
     </div>
+
+    <!-- Membres en attente -->
+    <div class="content-section" th:if="${pendingMembers != null and !#lists.isEmpty(pendingMembers)}">
+        <h2 class="section-title">
+            <i class="fas fa-user-clock"></i> Membres en Attente de Validation
+        </h2>
+        <div class="table-responsive custom-table">
+            <table class="table table-hover mb-0">
+                <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Date d'inscription</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="member : ${pendingMembers}">
+                    <td th:text="${member.firstname + ' ' + member.lastname}">Nom Prénom</td>
+                    <td th:text="${member.email}">email@example.com</td>
+                    <td th:text="${member.phone}">0690000000</td>
+                    <td th:text="${#temporals.format(member.membershipDate, 'dd/MM/yyyy')}">01/01/2025</td>
+                    <td>
+                        <form th:action="@{/admin/members/approve/{id}(id=${member.id})}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-sm btn-success" title="Approuver">
+                                <i class="fas fa-check"></i> Approuver
+                            </button>
+                        </form>
+                        <a th:href="@{/admin/members}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> Voir tout
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Messages récents non lus -->
+    <div class="content-section" th:if="${recentMessages != null and !#lists.isEmpty(recentMessages)}">
+        <h2 class="section-title">
+            <i class="fas fa-envelope-open-text"></i> Messages Récents
+        </h2>
+        <div class="table-responsive custom-table">
+            <table class="table table-hover mb-0">
+                <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Sujet</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="contact : ${recentMessages}">
+                    <td th:text="${contact.name}">Nom</td>
+                    <td th:text="${contact.email}">email@example.com</td>
+                    <td th:text="${contact.subject}">Sujet</td>
+                    <td th:text="${#temporals.format(contact.submittedAt, 'dd/MM/yyyy HH:mm')}">01/01/2025 10:00</td>
+                    <td>
+                                <span class="badge" th:classappend="${contact.read ? 'bg-secondary' : 'badge-pending'}">
+                                    <span th:text="${contact.read ? 'Lu' : 'Non lu'}">Non lu</span>
+                                </span>
+                    </td>
+                    <td>
+                        <a th:href="@{/admin/contacts}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> Voir
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <i class="fas fa-bolt"></i> Actions Rapides
+        </h2>
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <a href="/admin/members" class="btn btn-primary-custom w-100 py-3">
+                    <i class="fas fa-users fa-2x mb-2"></i><br>
+                    Gérer les Membres
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/admin/contacts" class="btn btn-primary-custom w-100 py-3">
+                    <i class="fas fa-envelope fa-2x mb-2"></i><br>
+                    Voir les Messages
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/admin/media" class="btn btn-primary-custom w-100 py-3">
+                    <i class="fas fa-images fa-2x mb-2"></i><br>
+                    Gérer les Médias
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/" target="_blank" class="btn btn-outline-primary w-100 py-3">
+                    <i class="fas fa-globe fa-2x mb-2"></i><br>
+                    Voir le Site
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informations système -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <i class="fas fa-info-circle"></i> Informations
+        </h2>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Version de l'application :</strong> 1.0.0</p>
+                <p><strong>Environnement :</strong> Développement</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Date du jour :</strong> <span th:text="${#temporals.format(#temporals.createNow(), 'dd MMMM yyyy')}">16 novembre 2025</span></p>
+                <p><strong>Base de données :</strong> H2 / PostgreSQL</p>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

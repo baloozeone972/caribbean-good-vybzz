@@ -99,6 +99,22 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    /**
+     * Nom complet du membre.
+     * Obligatoire, entre 2 et 100 caractères.
+     */
+    @NotBlank(message = "Le nom est obligatoire")
+    @Size(min = 2, max = 100, message = "Le nom doit contenir entre 2 et 100 caractères")
+    @Column(nullable = false, length = 100)
+    private String firstName;
+    /**
+     * Nom complet du membre.
+     * Obligatoire, entre 2 et 100 caractères.
+     */
+    @NotBlank(message = "Le nom est obligatoire")
+    @Size(min = 2, max = 100, message = "Le nom doit contenir entre 2 et 100 caractères")
+    @Column(nullable = false, length = 100)
+    private String lastName;
 
     /**
      * Nom complet du membre.
@@ -117,6 +133,22 @@ public class Member {
     @Email(message = "L'email doit être valide")
     @Column(nullable = false, unique = true, length = 150)
     private String email;
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
     /**
      * Numéro de téléphone du membre.

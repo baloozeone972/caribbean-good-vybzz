@@ -3,7 +3,6 @@ package com.caribean.goodvybzz.controller;
 import com.caribean.goodvybzz.model.Contact;
 import com.caribean.goodvybzz.model.Media;
 import com.caribean.goodvybzz.model.Member;
-import com.caribean.goodvybzz.model.MemberStatus;
 import com.caribean.goodvybzz.service.ContactService;
 import com.caribean.goodvybzz.service.MediaService;
 import com.caribean.goodvybzz.service.MemberService;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -60,31 +60,41 @@ public class AdminController {
      */
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
+        List<Member> allMembers = memberService.getAllMembers();
+        List<Contact> allContacts = contactService.getAllContacts();
+        List<Media> allMedia = mediaService.getAllMedia();
+
         // Statistiques générales
-        model.addAttribute("totalMembers", memberService.getAllMembers().size());
-        model.addAttribute("activeMembers",
-                memberService.getAllMembers().stream()
-                        .filter(m -> m.getStatus() == MemberStatus.ACTIVE)
-                        .count());
-        model.addAttribute("unreadMessages",
-                contactService.getAllContacts().stream()
-                        .filter(c -> !c.isRead())
-                        .count());
-        model.addAttribute("publishedMedia",
-                mediaService.getAllMedia().stream()
-                        .filter(Media::isPublished)
-                        .count());
+        model.addAttribute("totalMembers", allMembers.size());
+
+        // Compter les membres actifs (en utilisant la méthode getStatus() qui retourne une String)
+        long activeMembers = allMembers.stream()
+                .filter(m -> "ACTIVE".equalsIgnoreCase(m.getStatus().name()))
+                .count();
+        model.addAttribute("activeMembers", activeMembers);
+
+        // Compter les messages non lus (utiliser la propriété read)
+        long unreadMessages = allContacts.stream()
+                .filter(c -> !c.getRead())
+                .count();
+        model.addAttribute("unreadMessages", unreadMessages);
+
+        // Compter les médias publiés (utiliser la propriété published)
+        long publishedMedia = allMedia.stream()
+                .filter(Media::getPublished)
+                .count();
+        model.addAttribute("publishedMedia", publishedMedia);
 
         // Membres en attente de validation
-        List<Member> pendingMembers = memberService.getAllMembers().stream()
-                .filter(m -> m.getStatus() == MemberStatus.PENDING)
+        List<Member> pendingMembers = allMembers.stream()
+                .filter(m -> "PENDING".equalsIgnoreCase(m.getStatus().name()))
                 .limit(5)
                 .collect(Collectors.toList());
         model.addAttribute("pendingMembers", pendingMembers);
 
         // Messages récents non lus
-        List<Contact> recentMessages = contactService.getAllContacts().stream()
-                .filter(c -> !c.isRead())
+        List<Contact> recentMessages = allContacts.stream()
+                .filter(c -> !c.getRead())
                 .limit(5)
                 .collect(Collectors.toList());
         model.addAttribute("recentMessages", recentMessages);
@@ -104,14 +114,9 @@ public class AdminController {
         List<Member> members;
 
         if (status != null && !status.isEmpty()) {
-            try {
-                MemberStatus memberStatus = MemberStatus.valueOf(status.toUpperCase());
-                members = memberService.getAllMembers().stream()
-                        .filter(m -> m.getStatus() == memberStatus)
-                        .collect(Collectors.toList());
-            } catch (IllegalArgumentException e) {
-                members = memberService.getAllMembers();
-            }
+            members = memberService.getAllMembers().stream()
+                    .filter(m -> status.equalsIgnoreCase(m.getStatus().name()))
+                    .collect(Collectors.toList());
         } else {
             members = memberService.getAllMembers();
         }
@@ -130,16 +135,17 @@ public class AdminController {
     @PostMapping("/members/approve/{id}")
     public String approveMember(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            Member member = memberService.getMemberById(id);
-            if (member != null) {
-                member.setStatus(MemberStatus.ACTIVE);
+            Optional<Member> memberOpt = memberService.getMemberById(id);
+            if (memberOpt.isPresent()) {
+                Member member = memberOpt.get();
+                member.setStatus(Member.MemberStatus.valueOf("ACTIVE"));
                 memberService.saveMember(member);
                 redirectAttributes.addFlashAttribute("successMessage",
                         "Le membre " + member.getFirstName() + " " + member.getLastName() + " a été approuvé.");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Erreur lors de l'approbation du membre.");
+                    "Erreur lors de l'approbation du membre: " + e.getMessage());
         }
         return "redirect:/admin/members";
     }
@@ -157,17 +163,17 @@ public class AdminController {
                                      @RequestParam String status,
                                      RedirectAttributes redirectAttributes) {
         try {
-            Member member = memberService.getMemberById(id);
-            if (member != null) {
-                MemberStatus newStatus = MemberStatus.valueOf(status.toUpperCase());
-                member.setStatus(newStatus);
+            Optional<Member> memberOpt = memberService.getMemberById(id);
+            if (memberOpt.isPresent()) {
+                Member member = memberOpt.get();
+                member.setStatus(Member.MemberStatus.valueOf(status.toUpperCase()));
                 memberService.saveMember(member);
                 redirectAttributes.addFlashAttribute("successMessage",
                         "Le statut du membre a été modifié.");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Erreur lors de la modification du statut.");
+                    "Erreur lors de la modification du statut: " + e.getMessage());
         }
         return "redirect:/admin/members";
     }
@@ -187,7 +193,7 @@ public class AdminController {
                     "Le membre a été supprimé.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Erreur lors de la suppression du membre.");
+                    "Erreur lors de la suppression du membre: " + e.getMessage());
         }
         return "redirect:/admin/members";
     }
@@ -205,11 +211,11 @@ public class AdminController {
 
         if ("unread".equals(filter)) {
             contacts = contactService.getAllContacts().stream()
-                    .filter(c -> !c.isRead())
+                    .filter(c -> !c.getRead())
                     .collect(Collectors.toList());
         } else if ("read".equals(filter)) {
             contacts = contactService.getAllContacts().stream()
-                    .filter(Contact::isRead)
+                    .filter(Contact::getRead)
                     .collect(Collectors.toList());
         } else {
             contacts = contactService.getAllContacts();
@@ -229,16 +235,17 @@ public class AdminController {
     @PostMapping("/contacts/toggle-read/{id}")
     public String toggleReadStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            Contact contact = contactService.getContactById(id);
-            if (contact != null) {
-                contact.setRead(!contact.isRead());
+            Optional<Contact> contactOpt = contactService.getContactById(id);
+            if (contactOpt.isPresent()) {
+                Contact contact = contactOpt.get();
+                contact.setRead(!contact.getRead());
                 contactService.saveContact(contact);
                 redirectAttributes.addFlashAttribute("successMessage",
                         "Le statut du message a été modifié.");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Erreur lors de la modification du statut.");
+                    "Erreur lors de la modification du statut: " + e.getMessage());
         }
         return "redirect:/admin/contacts";
     }
@@ -258,7 +265,7 @@ public class AdminController {
                     "Le message a été supprimé.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Erreur lors de la suppression du message.");
+                    "Erreur lors de la suppression du message: " + e.getMessage());
         }
         return "redirect:/admin/contacts";
     }
@@ -273,25 +280,26 @@ public class AdminController {
     @GetMapping("/media")
     public String media(@RequestParam(required = false) String filter, Model model) {
         List<Media> mediaList;
+        List<Media> allMedia = mediaService.getAllMedia();
 
         if ("photos".equals(filter)) {
-            mediaList = mediaService.getAllMedia().stream()
-                    .filter(m -> m.getType() == Media.MediaType.PHOTO)
+            mediaList = allMedia.stream()
+                    .filter(m -> "PHOTO".equalsIgnoreCase(m.getType().name()))
                     .collect(Collectors.toList());
         } else if ("videos".equals(filter)) {
-            mediaList = mediaService.getAllMedia().stream()
-                    .filter(m -> m.getType() == Media.MediaType.VIDEO)
+            mediaList = allMedia.stream()
+                    .filter(m -> "VIDEO".equalsIgnoreCase(m.getType().name()))
                     .collect(Collectors.toList());
         } else if ("published".equals(filter)) {
-            mediaList = mediaService.getAllMedia().stream()
-                    .filter(Media::isPublished)
+            mediaList = allMedia.stream()
+                    .filter(Media::getPublished)
                     .collect(Collectors.toList());
         } else if ("unpublished".equals(filter)) {
-            mediaList = mediaService.getAllMedia().stream()
-                    .filter(m -> !m.isPublished())
+            mediaList = allMedia.stream()
+                    .filter(m -> !m.getPublished())
                     .collect(Collectors.toList());
         } else {
-            mediaList = mediaService.getAllMedia();
+            mediaList = allMedia;
         }
 
         model.addAttribute("mediaList", mediaList);
@@ -308,16 +316,17 @@ public class AdminController {
     @PostMapping("/media/toggle-publish/{id}")
     public String togglePublishStatus(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            Media media = mediaService.getMediaById(id);
-            if (media != null) {
-                media.setPublished(!media.isPublished());
+            Optional<Media> mediaOpt = mediaService.getMediaById(id);
+            if (mediaOpt.isPresent()) {
+                Media media = mediaOpt.get();
+                media.setPublished(!media.getPublished());
                 mediaService.saveMedia(media);
                 redirectAttributes.addFlashAttribute("successMessage",
                         "Le statut de publication du média a été modifié.");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Erreur lors de la modification du statut.");
+                    "Erreur lors de la modification du statut: " + e.getMessage());
         }
         return "redirect:/admin/media";
     }
@@ -337,7 +346,7 @@ public class AdminController {
                     "Le média a été supprimé.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Erreur lors de la suppression du média.");
+                    "Erreur lors de la suppression du média: " + e.getMessage());
         }
         return "redirect:/admin/media";
     }
